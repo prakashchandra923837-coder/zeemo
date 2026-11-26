@@ -7,20 +7,32 @@ on:
 
 jobs:
   build-apk:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build APK with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          command: buildozer android debug
-          buildozer_version: stable
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Android SDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Install NDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;25b"
+
+      - name: Build with Buildozer
+        run: |
+          pip install buildozer
+          buildozer android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: zeemo-clone-apk
-          path: ${{ steps.buildozer.outputs.filename }}
+          path: bin/*.apk
