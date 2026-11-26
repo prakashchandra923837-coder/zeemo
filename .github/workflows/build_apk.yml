@@ -33,9 +33,12 @@ jobs:
       - name: Build with Buildozer
         run: |
           export ANDROID_HOME=/home/runner/android/sdk
-          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:/home/runner/android/sdk/build-tools/34.0.0:$PATH
           pip install --upgrade buildozer
-          buildozer android debug
+          yes | buildozer android debug || true
+          if [ ! -f bin/*.apk ]; then
+            buildozer android debug
+          fi
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
